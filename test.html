@@ -105,15 +105,15 @@
 
 <!-- MOBILE PALETTE FAB + MODAL -->
 <button class="palette-fab" id="paletteFab" aria-label="Open palette">📋</button>
-<div class="palette-modal-backdrop" id="paletteModal">
-  <div class="palette-modal">
+<div class="palette-modal-backdrop" id="paletteModal" data-pm="backdrop">
+  <div class="palette-modal" data-pm="sheet">
     <div class="pm-head">
       <div class="pm-handle"></div>
       <div class="pm-title">
         <strong>Question palette</strong>
-        <span class="muted small">Tap a number to jump</span>
+        <span class="muted small">Tap a number · Tap outside to close</span>
       </div>
-      <button class="pm-close" id="paletteCloseBtnTop" aria-label="Close">✕</button>
+      <button class="pm-close" id="paletteCloseBtnTop" data-pm="close" aria-label="Close">✕</button>
     </div>
 
     <div class="pm-stats" id="pmStats">
@@ -130,11 +130,11 @@
     </div>
 
     <div class="pm-sections" id="pmSections">
-      <button class="pm-jump active" data-jump="all">All</button>
-      <button class="pm-jump" data-jump="0">Reasoning (1–25)</button>
-      <button class="pm-jump" data-jump="1">GA (26–50)</button>
-      <button class="pm-jump" data-jump="2">Quant (51–75)</button>
-      <button class="pm-jump" data-jump="3">English (76–100)</button>
+      <button class="pm-jump active" data-jump="all" data-pm="jump">All</button>
+      <button class="pm-jump" data-jump="0" data-pm="jump">Reasoning (1–25)</button>
+      <button class="pm-jump" data-jump="1" data-pm="jump">GA (26–50)</button>
+      <button class="pm-jump" data-jump="2" data-pm="jump">Quant (51–75)</button>
+      <button class="pm-jump" data-jump="3" data-pm="jump">English (76–100)</button>
     </div>
 
     <div class="pm-body">
@@ -142,8 +142,8 @@
     </div>
 
     <div class="pm-foot">
-      <button class="btn btn-outline" id="paletteCloseBtn">Close</button>
-      <button class="btn btn-accent" id="pmSubmit">Submit Test</button>
+      <button class="btn btn-outline pm-close-btn" id="paletteCloseBtn" data-pm="close">✕ Close</button>
+      <button class="btn btn-accent" id="pmSubmit" data-pm="submit">Submit Test</button>
     </div>
   </div>
 </div>

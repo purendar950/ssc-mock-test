@@ -238,42 +238,86 @@
       });
     });
 
-    // Mobile palette FAB
-    const fab = document.getElementById('paletteFab');
-    const pmodal = document.getElementById('paletteModal');
-    const pclose = document.getElementById('paletteCloseBtn');
-    const pcloseTop = document.getElementById('paletteCloseBtnTop');
-    const psubmit = document.getElementById('pmSubmit');
-
-    fab?.addEventListener('click', () => {
+    // Mobile palette — open/close functions on App namespace
+    App.openPalette = function () {
       App.renderPalette();
-      pmodal.classList.add('show');
-    });
-    const closeModal = () => pmodal.classList.remove('show');
-    pclose?.addEventListener('click', closeModal);
-    pcloseTop?.addEventListener('click', closeModal);
-    pmodal?.addEventListener('click', (e) => { if (e.target === pmodal) closeModal(); });
-    psubmit?.addEventListener('click', () => { closeModal(); App.openSubmit(); });
+      const m = document.getElementById('paletteModal');
+      if (!m) return;
+      m.classList.add('show');
+      const sheet = m.querySelector('.palette-modal');
+      if (sheet) sheet.classList.remove('closing');
+      document.getElementById('paletteFab')?.classList.add('hidden');
+    };
+    App.closePalette = function () {
+      const m = document.getElementById('paletteModal');
+      if (!m) return;
+      const sheet = m.querySelector('.palette-modal');
+      if (sheet) {
+        sheet.classList.add('closing');
+        setTimeout(() => {
+          m.classList.remove('show');
+          sheet.classList.remove('closing');
+        }, 230);
+      } else {
+        m.classList.remove('show');
+      }
+      document.getElementById('paletteFab')?.classList.remove('hidden');
+    };
 
-    // Section jump pills inside mobile palette
-    document.querySelectorAll('.pm-jump').forEach(btn => {
-      btn.addEventListener('click', () => {
+    // Open: FAB button
+    document.getElementById('paletteFab')?.addEventListener('click', (e) => {
+      e.preventDefault(); e.stopPropagation();
+      App.openPalette();
+    });
+
+    // Delegated close handler — works for ANY element marked data-pm="close"
+    document.addEventListener('click', (e) => {
+      const closer = e.target.closest('[data-pm="close"]');
+      if (closer) { e.preventDefault(); e.stopPropagation(); App.closePalette(); return; }
+      const submitBtn = e.target.closest('[data-pm="submit"]');
+      if (submitBtn) { e.preventDefault(); App.closePalette(); App.openSubmit(); return; }
+      const jump = e.target.closest('[data-pm="jump"]');
+      if (jump) {
+        e.preventDefault();
         document.querySelectorAll('.pm-jump').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        const j = btn.dataset.jump;
+        jump.classList.add('active');
         const body = document.querySelector('.pm-body');
-        if (!body) return;
-        body.scrollTo({ top: 0, behavior: 'smooth' });
-        if (j !== 'all') {
-          const secIdx = +j;
+        if (body) body.scrollTo({ top: 0, behavior: 'smooth' });
+        if (jump.dataset.jump !== 'all') {
+          const secIdx = +jump.dataset.jump;
           const startIdx = bank.sections[secIdx].questions[0] - 1;
           state.current = startIdx;
           state.visited[startIdx] = true;
           App.renderQuestion();
-          closeModal();
+          App.closePalette();
         }
-      });
+        return;
+      }
+      // Tap on backdrop (not the sheet itself) closes
+      if (e.target.dataset.pm === 'backdrop' && e.target.classList.contains('show')) {
+        App.closePalette();
+      }
     });
+
+    // Escape key closes
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && document.getElementById('paletteModal')?.classList.contains('show')) {
+        App.closePalette();
+      }
+    });
+
+    // Swipe-down on the sheet header to close
+    const head = document.querySelector('.pm-head');
+    if (head) {
+      let startY = null;
+      head.addEventListener('touchstart', (e) => { startY = e.touches[0].clientY; }, { passive: true });
+      head.addEventListener('touchend', (e) => {
+        if (startY === null) return;
+        const dy = (e.changedTouches[0].clientY - startY);
+        if (dy > 60) App.closePalette();
+        startY = null;
+      });
+    }
 
     App.renderPalette();
     App.updateHeader();
