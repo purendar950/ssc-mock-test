@@ -183,7 +183,7 @@
     });
   };
 
-  /* ============== TEST PAGE: take test ============== */
+  /* ============== TEST PAGE: take test (DARK THEME) ============== */
   let state = null;
 
   App.initTest = function () {
@@ -194,11 +194,24 @@
       answers: new Array(bank.questions.length).fill(null),
       visited: new Array(bank.questions.length).fill(false),
       marked: new Array(bank.questions.length).fill(false),
+      bookmarked: new Array(bank.questions.length).fill(false),
+      starred: new Array(bank.questions.length).fill(false),
+      reported: new Array(bank.questions.length).fill(false),
       timeLeft: bank.duration * 60,
-      timerId: null
+      qTimeAt: Date.now(),  // when current question opened
+      qTimeSpent: new Array(bank.questions.length).fill(0),  // accumulated seconds
+      timerId: null,
+      qTimerId: null,
+      paused: false
     };
     state.visited[0] = true;
 
+    // Title
+    const titleEl = document.getElementById('testTitle');
+    if (titleEl) titleEl.textContent = state.test.title;
+    document.getElementById('testTitle2') && (document.getElementById('testTitle2').textContent = state.test.title);
+
+    // Instructions modal
     const modal = document.getElementById('instructionsModal');
     const agree = document.getElementById('agreeChk');
     const start = document.getElementById('startTestBtn');
@@ -208,37 +221,77 @@
     start.addEventListener('click', () => {
       modal.style.display = 'none';
       App.startTimer();
+      App.startQTimer();
       App.renderQuestion();
     });
 
-    document.getElementById('prevBtn').addEventListener('click', () => App.navigate(-1));
+    // Bottom action bar
     document.getElementById('nextBtn').addEventListener('click', () => App.navigate(1));
     document.getElementById('clearResponseBtn').addEventListener('click', App.clearResponse);
     document.getElementById('markReviewBtn').addEventListener('click', App.markReview);
-    document.getElementById('submitBtn').addEventListener('click', App.openSubmit);
 
+    // Meta row icons
+    document.getElementById('bookmarkBtn').addEventListener('click', () => {
+      state.bookmarked[state.current] = !state.bookmarked[state.current];
+      document.getElementById('bookmarkBtn').classList.toggle('active', state.bookmarked[state.current]);
+    });
+    document.getElementById('starBtn').addEventListener('click', () => {
+      state.starred[state.current] = !state.starred[state.current];
+      document.getElementById('starBtn').classList.toggle('active', state.starred[state.current]);
+    });
+    document.getElementById('reportBtn').addEventListener('click', () => {
+      state.reported[state.current] = !state.reported[state.current];
+      document.getElementById('reportBtn').classList.toggle('active', state.reported[state.current]);
+      if (state.reported[state.current]) alert('⚠ Question reported. Our team will review it.');
+    });
+
+    // Pause
+    document.getElementById('pauseBtn').addEventListener('click', App.togglePause);
+
+    // Calculator
+    document.getElementById('calcBtn').addEventListener('click', () => {
+      App.openCalc();
+    });
+    document.getElementById('menuBtn').addEventListener('click', () => {
+      App.openDrawer();
+    });
+
+    // Drawer items
+    document.querySelectorAll('[data-action]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const a = btn.dataset.action;
+        App.closeDrawer();
+        if (a === 'lang') {
+          const cur = document.getElementById('mLangLabel').textContent;
+          const next = cur === 'English' ? 'हिंदी' : 'English';
+          document.getElementById('mLangLabel').textContent = next;
+        } else if (a === 'sections') {
+          const sec = +prompt('Jump to section:\n0 = Reasoning (1-25)\n1 = GA (26-50)\n2 = Quant (51-75)\n3 = English (76-100)', '0');
+          if (!isNaN(sec) && sec >= 0 && sec <= 3) {
+            state.current = bank.sections[sec].questions[0] - 1;
+            state.visited[state.current] = true;
+            App.renderQuestion();
+          }
+        } else if (a === 'instructions') {
+          document.getElementById('instructionsModal').style.display = 'grid';
+        }
+      });
+    });
+    document.querySelectorAll('[data-pm="open-palette"]').forEach(btn => {
+      btn.addEventListener('click', () => { App.closeDrawer(); App.openPalette(); });
+    });
+    document.getElementById('mSubmit')?.addEventListener('click', () => {
+      App.closeDrawer();
+      App.openSubmit();
+    });
+
+    // Submit flow
     document.getElementById('cancelSubmit').addEventListener('click', () => {
       document.getElementById('submitModal').classList.add('hidden');
     });
     document.getElementById('confirmSubmit').addEventListener('click', App.submitTest);
 
-    document.querySelectorAll('.section-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const sec = +btn.dataset.section;
-        const startIdx = bank.sections[sec].questions[0] - 1;
-        state.current = startIdx;
-        App.renderQuestion();
-      });
-    });
-
-    document.querySelectorAll('.lang-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-      });
-    });
-
-    // Mobile palette — open/close functions on App namespace
+    // Palette
     App.openPalette = function () {
       App.renderPalette();
       const m = document.getElementById('paletteModal');
@@ -246,7 +299,6 @@
       m.classList.add('show');
       const sheet = m.querySelector('.palette-modal');
       if (sheet) sheet.classList.remove('closing');
-      document.getElementById('paletteFab')?.classList.add('hidden');
     };
     App.closePalette = function () {
       const m = document.getElementById('paletteModal');
@@ -261,19 +313,29 @@
       } else {
         m.classList.remove('show');
       }
-      document.getElementById('paletteFab')?.classList.remove('hidden');
     };
 
-    // Open: FAB button
-    document.getElementById('paletteFab')?.addEventListener('click', (e) => {
-      e.preventDefault(); e.stopPropagation();
-      App.openPalette();
-    });
+    // Drawer
+    App.openDrawer = function () { document.getElementById('mDrawer')?.classList.add('show'); };
+    App.closeDrawer = function () { document.getElementById('mDrawer')?.classList.remove('show'); };
 
-    // Delegated close handler — works for ANY element marked data-pm="close"
+    // Calculator
+    App.openCalc = function () { document.getElementById('calcModal')?.classList.add('show'); resetCalc(); };
+    App.closeCalc = function () { document.getElementById('calcModal')?.classList.remove('show'); };
+
+    // Delegated handlers
     document.addEventListener('click', (e) => {
       const closer = e.target.closest('[data-pm="close"]');
-      if (closer) { e.preventDefault(); e.stopPropagation(); App.closePalette(); return; }
+      if (closer) {
+        e.preventDefault(); e.stopPropagation();
+        const m = document.getElementById('paletteModal');
+        const d = document.getElementById('mDrawer');
+        const c = document.getElementById('calcModal');
+        if (m?.classList.contains('show')) App.closePalette();
+        else if (d?.classList.contains('show')) App.closeDrawer();
+        else if (c?.classList.contains('show')) App.closeCalc();
+        return;
+      }
       const submitBtn = e.target.closest('[data-pm="submit"]');
       if (submitBtn) { e.preventDefault(); App.closePalette(); App.openSubmit(); return; }
       const jump = e.target.closest('[data-pm="jump"]');
@@ -293,20 +355,32 @@
         }
         return;
       }
-      // Tap on backdrop (not the sheet itself) closes
-      if (e.target.dataset.pm === 'backdrop' && e.target.classList.contains('show')) {
-        App.closePalette();
+      if (e.target.dataset?.pm === 'backdrop' && e.target.classList.contains('show')) {
+        e.target.classList.remove('show');
+        return;
       }
+      // Calculator buttons
+      const calcKey = e.target.closest('[data-k]');
+      if (calcKey) { e.preventDefault(); calcPress(calcKey.dataset.k); return; }
     });
 
-    // Escape key closes
+    // Escape closes any open modal
     document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape' && document.getElementById('paletteModal')?.classList.contains('show')) {
-        App.closePalette();
+      if (e.key === 'Escape') {
+        if (document.getElementById('paletteModal')?.classList.contains('show')) App.closePalette();
+        else if (document.getElementById('mDrawer')?.classList.contains('show')) App.closeDrawer();
+        else if (document.getElementById('calcModal')?.classList.contains('show')) App.closeCalc();
+        else if (state.paused) App.togglePause();
+        return;
+      }
+      // Arrow keys for prev/next
+      if (!['INPUT','TEXTAREA'].includes(e.target.tagName || '')) {
+        if (e.key === 'ArrowRight' || e.key === 'ArrowDown') { e.preventDefault(); App.navigate(1); }
+        else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') { e.preventDefault(); App.navigate(-1); }
       }
     });
 
-    // Swipe-down on the sheet header to close
+    // Swipe-down on palette sheet header
     const head = document.querySelector('.pm-head');
     if (head) {
       let startY = null;
@@ -320,53 +394,121 @@
     }
 
     App.renderPalette();
-    App.updateHeader();
+    App.renderQuestion();
+  };
+
+  /* === CALCULATOR === */
+  let calcExpr = '';
+  function resetCalc() { calcExpr = ''; updateCalcDisplay(); }
+  function updateCalcDisplay() {
+    const d = document.getElementById('calcDisplay');
+    if (d) d.textContent = calcExpr || '0';
+  }
+  function calcPress(k) {
+    if (k === 'C') { calcExpr = ''; }
+    else if (k === '=') {
+      try {
+        const safe = calcExpr.replace(/×/g, '*').replace(/÷/g, '/').replace(/−/g, '-');
+        const result = Function('"use strict"; return (' + safe + ')')();
+        calcExpr = String(result);
+      } catch (e) { calcExpr = 'Error'; }
+    } else if (k === '%') { calcExpr += '/100'; }
+    else { calcExpr += k; }
+    updateCalcDisplay();
+  }
+
+  /* === PAUSE === */
+  App.togglePause = function () {
+    state.paused = !state.paused;
+    const btn = document.getElementById('pauseBtn');
+    if (state.paused) {
+      btn.innerHTML = '<svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor"><polygon points="6 4 20 12 6 20 6 4"/></svg>';
+      clearInterval(state.timerId);
+      clearInterval(state.qTimerId);
+    } else {
+      btn.innerHTML = '<svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></svg>';
+      state.timerId = setInterval(App.tickMain, 1000);
+      state.qTimeAt = Date.now();
+      state.qTimerId = setInterval(App.tickQ, 1000);
+    }
   };
 
   App.startTimer = function () {
+    state.timerId = setInterval(App.tickMain, 1000);
+  };
+  App.tickMain = function () {
+    if (state.paused) return;
     const t = document.getElementById('timer');
-    const update = () => {
-      const m = Math.floor(state.timeLeft / 60);
-      const s = state.timeLeft % 60;
-      t.textContent = `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
-      if (state.timeLeft <= 60) t.classList.add('warning');
-      if (state.timeLeft <= 0) { clearInterval(state.timerId); App.submitTest(); return; }
-      state.timeLeft--;
-    };
-    update();
-    state.timerId = setInterval(update, 1000);
+    const h = Math.floor(state.timeLeft / 3600);
+    const m = Math.floor((state.timeLeft % 3600) / 60);
+    const s = state.timeLeft % 60;
+    t.textContent = `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+    t.style.color = state.timeLeft <= 60 ? '#ff7066' : '#fff';
+    if (state.timeLeft <= 0) { clearInterval(state.timerId); App.submitTest(); return; }
+    state.timeLeft--;
+  };
+  App.startQTimer = function () {
+    state.qTimeAt = Date.now();
+    state.qTimerId = setInterval(App.tickQ, 1000);
+  };
+  App.tickQ = function () {
+    if (state.paused) return;
+    const el = document.getElementById('qTimeSpent');
+    if (!el) return;
+    const sec = state.qTimeSpent[state.current] + Math.floor((Date.now() - state.qTimeAt) / 1000);
+    const m = Math.floor(sec / 60);
+    const s = sec % 60;
+    el.textContent = `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
   };
 
   App.renderQuestion = function () {
+    if (!state) return;
+    // Save time spent on previous question
+    if (state.qTimeAt) {
+      const spent = Math.floor((Date.now() - state.qTimeAt) / 1000);
+      state.qTimeSpent[state.current] = (state.qTimeSpent[state.current] || 0) + spent;
+    }
+    state.qTimeAt = Date.now();
+
     const q = state.test.questions[state.current];
-    document.getElementById('qNum').textContent = `Question ${state.current + 1} of ${state.test.questions.length}`;
+    document.getElementById('qNumBadge').textContent = state.current + 1;
     document.getElementById('qText').textContent = q.text;
     const opts = document.getElementById('qOptions');
     opts.innerHTML = q.opts.map((o, i) => `
-      <div class="option ${state.answers[state.current] === i ? 'selected' : ''}" data-i="${i}">
-        <span class="opt-letter">${String.fromCharCode(65 + i)}</span>
-        <span>${o}</span>
+      <div class="q-opt ${state.answers[state.current] === i ? 'selected' : ''}" data-i="${i}">
+        <span class="opt-num">${i + 1}.</span>
+        <span class="opt-text">${o}</span>
+        <span class="opt-tick">✓</span>
       </div>
     `).join('');
-    opts.querySelectorAll('.option').forEach(el => {
+    opts.querySelectorAll('.q-opt').forEach(el => {
       el.addEventListener('click', () => {
         state.answers[state.current] = +el.dataset.i;
         App.renderQuestion();
         App.renderPalette();
-        App.updateHeader();
       });
     });
 
-    const sec = state.test.sections.find(s => state.current + 1 >= s.questions[0] && state.current + 1 <= s.questions[1]);
-    document.getElementById('sectionPill').textContent = `Section ${state.test.sections.indexOf(sec) + 1} · ${sec.name}`;
-    document.querySelectorAll('.section-btn').forEach(b => b.classList.remove('active'));
-    const secIdx = state.test.sections.indexOf(sec);
-    document.querySelector(`.section-btn[data-section="${secIdx}"]`)?.classList.add('active');
+    // Update icon states
+    document.getElementById('bookmarkBtn').classList.toggle('active', !!state.bookmarked[state.current]);
+    document.getElementById('starBtn').classList.toggle('active', !!state.starred[state.current]);
+    document.getElementById('reportBtn').classList.toggle('active', !!state.reported[state.current]);
+
+    // Update qTimeSpent display for this question
+    const el = document.getElementById('qTimeSpent');
+    if (el) {
+      const sec = state.qTimeSpent[state.current] || 0;
+      el.textContent = `${String(Math.floor(sec/60)).padStart(2,'0')}:${String(sec%60).padStart(2,'0')}`;
+    }
+
+    // Trigger scroll-to-top on mobile
+    document.querySelector('.tm')?.scrollTo({ top: 0, behavior: 'smooth' });
 
     App.renderPalette();
   };
 
   App.navigate = function (delta) {
+    if (!state) return;
     const next = state.current + delta;
     if (next < 0 || next >= state.test.questions.length) return;
     state.visited[next] = true;
@@ -375,18 +517,21 @@
   };
 
   App.clearResponse = function () {
+    if (!state) return;
     state.answers[state.current] = null;
     App.renderQuestion();
     App.renderPalette();
-    App.updateHeader();
   };
 
   App.markReview = function () {
+    if (!state) return;
     state.marked[state.current] = !state.marked[state.current];
+    App.renderPalette();
     App.navigate(1);
   };
 
   App.renderPalette = function () {
+    if (!state) return;
     const buildGrid = (targetId) => {
       const grid = document.getElementById(targetId);
       if (!grid) return;
@@ -403,36 +548,23 @@
           state.visited[+b.dataset.i] = true;
           state.current = +b.dataset.i;
           App.renderQuestion();
-          document.getElementById('paletteModal')?.classList.remove('show');
+          App.closePalette();
         });
       });
     };
-    buildGrid('paletteGrid');
     buildGrid('paletteGridMobile');
 
     const answered = state.answers.filter(a => a !== null).length;
     const marked = state.marked.filter(Boolean).length;
-    const visited = state.visited.filter(Boolean).length;
     const total = state.test.questions.length;
     const left = total - answered;
-    document.getElementById('cntAnswered').textContent = answered;
-    document.getElementById('cntMarked').textContent = marked;
-    document.getElementById('cntNot').textContent = total - visited;
-    document.getElementById('totalAttempted').textContent = answered;
-    document.getElementById('totalUnattempted').textContent = left;
-    // Mobile palette mini-stats
     const pmA = document.getElementById('pmAns'); if (pmA) pmA.textContent = answered;
     const pmM = document.getElementById('pmMark'); if (pmM) pmM.textContent = marked;
     const pmL = document.getElementById('pmLeft'); if (pmL) pmL.textContent = left;
   };
 
-  App.updateHeader = function () {
-    const answered = state.answers.filter(a => a !== null).length;
-    const pct = (answered / state.test.questions.length) * 100;
-    document.getElementById('progressBar').style.width = pct + '%';
-  };
-
   App.openSubmit = function () {
+    if (!state) return;
     const unanswered = state.answers.filter(a => a === null).length;
     document.getElementById('unattemptedWarn').textContent = unanswered;
     const attempted = state.test.questions.length - unanswered;
