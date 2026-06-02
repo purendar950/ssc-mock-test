@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Admin Panel · TestHub</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Poppins:wght@500;600;700;800&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="assets/css/style.css" />
+</head>
+<body>
+
+<!-- LOGIN VIEW -->
+<div id="loginView" class="login-shell">
+  <div class="login-card">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:18px">
+      <span class="logo-mark">T</span>
+      <div>
+        <strong style="font-family:'Poppins',sans-serif;font-size:18px">TestHub Admin</strong>
+        <div class="muted small">Manage test series &amp; payments</div>
+      </div>
+    </div>
+    <h2>Sign in</h2>
+    <p class="muted">Use the demo credentials: <strong>admin</strong> / <strong>admin123</strong></p>
+    <label style="display:block;font-size:13px;font-weight:600;margin:12px 0 4px">Username</label>
+    <input class="input" id="adminUser" value="admin" />
+    <label style="display:block;font-size:13px;font-weight:600;margin:12px 0 4px">Password</label>
+    <input class="input" id="adminPass" type="password" value="admin123" />
+    <button class="btn btn-primary btn-block" id="loginBtn">Sign in</button>
+    <p class="muted small" style="text-align:center;margin-top:14px"><a href="index.html">← Back to website</a></p>
+  </div>
+</div>
+
+<!-- ADMIN DASHBOARD -->
+<div id="adminView" class="hidden">
+  <header class="topbar">
+    <div class="container topbar-inner">
+      <a href="index.html" class="logo">
+        <span class="logo-mark">T</span>
+        <span class="logo-text">Test<span class="accent">Hub</span></span>
+      </a>
+      <nav class="main-nav">
+        <a href="index.html">View site</a>
+        <a href="#" id="logoutBtn">Logout</a>
+      </nav>
+      <div class="topbar-actions">
+        <span class="muted small" style="margin-right:10px">👤 admin</span>
+      </div>
+    </div>
+  </header>
+
+  <div class="admin-shell">
+    <aside class="admin-side">
+      <div class="admin-brand">
+        <span class="logo-mark" style="width:30px;height:30px;font-size:14px">A</span>
+        <strong>Admin Console</strong>
+      </div>
+      <a href="#" class="active" data-view="dash"><span class="ico">📊</span> Dashboard</a>
+      <a href="#" data-view="orders"><span class="ico">💳</span> Orders &amp; Payments</a>
+      <a href="#" data-view="series"><span class="ico">📚</span> Test Series</a>
+      <a href="#" data-view="addSeries"><span class="ico">➕</span> Add New Series</a>
+      <a href="#" data-view="tests"><span class="ico">📝</span> Tests</a>
+      <a href="#" data-view="addTest"><span class="ico">➕</span> Add New Test</a>
+      <a href="#" data-view="users"><span class="ico">👥</span> Users</a>
+    </aside>
+
+    <main class="admin-main">
+      <!-- DASHBOARD -->
+      <div data-panel="dash">
+        <div class="admin-head">
+          <h1>Dashboard</h1>
+          <span class="muted small">Last updated: just now</span>
+        </div>
+        <div class="admin-stats">
+          <div class="admin-stat"><div class="ico" style="background:#e8f0fe;color:#1a73e8">💰</div><div><strong>₹2.4 L</strong><span>Revenue (May)</span></div></div>
+          <div class="admin-stat"><div class="ico" style="background:#e6f4ea;color:#1e8e3e">📦</div><div><strong id="statOrders">0</strong><span>Total orders</span></div></div>
+          <div class="admin-stat"><div class="ico" style="background:#fff4e5;color:#f29900">⏳</div><div><strong id="statPending">0</strong><span>Pending approvals</span></div></div>
+          <div class="admin-stat"><div class="ico" style="background:#f3e8fd;color:#a142f4">📚</div><div><strong id="statSeries">0</strong><span>Active series</span></div></div>
+        </div>
+
+        <div class="admin-card">
+          <h3>Recent pending payments</h3>
+          <div style="overflow-x:auto"><table class="table" id="dashPending"></table></div>
+        </div>
+
+        <div class="admin-card">
+          <h3>Quick actions</h3>
+          <div style="display:flex;gap:10px;flex-wrap:wrap">
+            <button class="btn btn-primary" data-go="addSeries">➕ Add new test series</button>
+            <button class="btn btn-outline" data-go="addTest">➕ Add new test</button>
+            <button class="btn btn-outline" data-go="orders">💳 Review payments</button>
+            <button class="btn btn-outline" data-go="users">👥 View users</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ORDERS -->
+      <div data-panel="orders" class="hidden">
+        <div class="admin-head">
+          <h1>Orders &amp; Payments</h1>
+          <div class="filter-tabs">
+            <button class="tab active" data-filter="all">All</button>
+            <button class="tab" data-filter="pending">Pending</button>
+            <button class="tab" data-filter="approved">Approved</button>
+            <button class="tab" data-filter="rejected">Rejected</button>
+          </div>
+        </div>
+        <div class="admin-card">
+          <div style="overflow-x:auto"><table class="table" id="ordersTable"></table></div>
+        </div>
+      </div>
+
+      <!-- SERIES LIST -->
+      <div data-panel="series" class="hidden">
+        <div class="admin-head">
+          <h1>Test Series</h1>
+          <button class="btn btn-primary" data-go="addSeries">➕ Add new series</button>
+        </div>
+        <div class="admin-card">
+          <div style="overflow-x:auto"><table class="table" id="seriesTable"></table></div>
+        </div>
+      </div>
+
+      <!-- ADD SERIES FORM -->
+      <div data-panel="addSeries" class="hidden">
+        <div class="admin-head">
+          <h1 id="seriesFormTitle">Add a new test series</h1>
+          <span class="muted small" id="seriesFormId"></span>
+        </div>
+        <form class="admin-card" id="seriesForm">
+          <input type="hidden" id="seriesEditId" />
+          <div class="form-grid">
+            <div class="full">
+              <label style="font-size:13px;font-weight:600">Series name *</label>
+              <input class="input" id="sf_name" required placeholder="e.g. SSC CGL 2026 Complete Pro" />
+            </div>
+            <div class="full">
+              <label style="font-size:13px;font-weight:600">Tagline *</label>
+              <input class="input" id="sf_tagline" required placeholder="One-line description students will see" />
+            </div>
+            <div>
+              <label style="font-size:13px;font-weight:600">Price (₹) *</label>
+              <input class="input" id="sf_price" type="number" min="0" required />
+            </div>
+            <div>
+              <label style="font-size:13px;font-weight:600">Original price (₹)</label>
+              <input class="input" id="sf_original" type="number" min="0" placeholder="MRP (strikethrough)" />
+            </div>
+            <div>
+              <label style="font-size:13px;font-weight:600">Number of tests</label>
+              <input class="input" id="sf_tests" type="number" min="1" />
+            </div>
+            <div>
+              <label style="font-size:13px;font-weight:600">Validity (months)</label>
+              <input class="input" id="sf_validity" type="number" min="1" value="12" />
+            </div>
+            <div class="full">
+              <label style="font-size:13px;font-weight:600">Features (one per line) *</label>
+              <textarea class="input" id="sf_features" required placeholder="120 full-length mock tests&#10;Live classes by ex-SSC toppers&#10;Unlimited doubt support"></textarea>
+            </div>
+            <div>
+              <label style="font-size:13px;font-weight:600">Banner colour</label>
+              <select class="input" id="sf_banner">
+                <option value="">Blue (default)</option>
+                <option value="b1">Orange</option>
+                <option value="b2">Green</option>
+                <option value="b3">Purple</option>
+                <option value="b4">Red</option>
+                <option value="b5">Teal</option>
+              </select>
+            </div>
+            <div>
+              <label style="font-size:13px;font-weight:600">Mark as bestseller?</label>
+              <select class="input" id="sf_bestseller">
+                <option value="no">No</option>
+                <option value="yes">Yes</option>
+              </select>
+            </div>
+          </div>
+          <div style="display:flex;gap:10px;margin-top:18px">
+            <button type="submit" class="btn btn-primary">💾 Save series</button>
+            <button type="reset" class="btn btn-outline">Reset</button>
+          </div>
+        </form>
+      </div>
+
+      <!-- TESTS -->
+      <div data-panel="tests" class="hidden">
+        <div class="admin-head">
+          <h1>Tests</h1>
+          <button class="btn btn-primary" data-go="addTest">➕ Add new test</button>
+        </div>
+        <div class="admin-card">
+          <div style="overflow-x:auto"><table class="table" id="testsTable"></table></div>
+        </div>
+      </div>
+
+      <!-- ADD TEST -->
+      <div data-panel="addTest" class="hidden">
+        <div class="admin-head"><h1>Add a new test</h1></div>
+        <form class="admin-card" id="testForm">
+          <div class="form-grid">
+            <div class="full">
+              <label style="font-size:13px;font-weight:600">Test title *</label>
+              <input class="input" id="tf_title" required placeholder="e.g. SSC CGL Tier-I Mock 18" />
+            </div>
+            <div>
+              <label style="font-size:13px;font-weight:600">Exam *</label>
+              <select class="input" id="tf_exam">
+                <option>SSC CGL</option><option>SSC CHSL</option><option>SSC MTS</option>
+                <option>SSC GD</option><option>SSC CPO</option><option>SSC Steno</option>
+                <option>SSC Selection Post</option><option>SSC JE</option>
+              </select>
+            </div>
+            <div>
+              <label style="font-size:13px;font-weight:600">Type *</label>
+              <select class="input" id="tf_type">
+                <option value="free">Free</option><option value="pro">Pro</option>
+                <option value="pyq">Previous Year</option>
+              </select>
+            </div>
+            <div>
+              <label style="font-size:13px;font-weight:600">No. of questions *</label>
+              <input class="input" id="tf_qs" type="number" value="100" min="1" />
+            </div>
+            <div>
+              <label style="font-size:13px;font-weight:600">Duration (min) *</label>
+              <input class="input" id="tf_duration" type="number" value="60" min="1" />
+            </div>
+            <div class="full">
+              <label style="font-size:13px;font-weight:600">Status</label>
+              <select class="input" id="tf_status">
+                <option value="draft">Save as draft</option>
+                <option value="published">Publish immediately</option>
+              </select>
+            </div>
+          </div>
+          <div style="display:flex;gap:10px;margin-top:18px">
+            <button type="submit" class="btn btn-primary">💾 Save test</button>
+            <button type="reset" class="btn btn-outline">Reset</button>
+          </div>
+        </form>
+      </div>
+
+      <!-- USERS -->
+      <div data-panel="users" class="hidden">
+        <div class="admin-head"><h1>Users</h1></div>
+        <div class="admin-card">
+          <p class="muted">Sample user records (demo). In production this would be wired to your database.</p>
+          <div style="overflow-x:auto"><table class="table" id="usersTable"></table></div>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+
+<script src="assets/js/data.js"></script>
+<script src="assets/js/app.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', App.initAdmin);
+</script>
+</body>
+</html>

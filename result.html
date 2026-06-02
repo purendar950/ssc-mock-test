@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Test Result · TestHub</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Poppins:wght@500;600;700;800&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="assets/css/style.css" />
+</head>
+<body>
+
+<header class="topbar">
+  <div class="container topbar-inner">
+    <a href="index.html" class="logo">
+      <span class="logo-mark">T</span>
+      <span class="logo-text">Test<span class="accent">Hub</span></span>
+    </a>
+    <nav class="main-nav">
+      <a href="index.html">Home</a>
+      <a href="tests.html">Mock Tests</a>
+      <a href="series.html">Test Series</a>
+      <a href="#">PYQs</a>
+      <a href="#">Live Classes</a>
+    </nav>
+    <div class="topbar-actions">
+      <button class="btn btn-ghost">Sign in</button>
+      <a href="series.html" class="btn btn-primary">Buy Series</a>
+    </div>
+  </div>
+</header>
+
+<section class="result-hero">
+  <div class="container">
+    <div class="result-hero-card">
+      <div>
+        <span class="pill pill-success">✓ Submitted successfully</span>
+        <h1 id="resultTitle">SSC CGL Tier-I Mock 17</h1>
+        <p class="muted-light">Your detailed analysis is ready. Share it with friends and challenge them.</p>
+        <div class="result-share">
+          <button class="btn btn-light">📤 Share result</button>
+          <button class="btn btn-light">🔁 Re-take test</button>
+          <button class="btn btn-light">📄 View solutions</button>
+        </div>
+      </div>
+      <div class="score-circle">
+        <svg viewBox="0 0 120 120">
+          <circle cx="60" cy="60" r="52" class="circle-bg"/>
+          <circle cx="60" cy="60" r="52" class="circle-fg" id="scoreCircle"/>
+        </svg>
+        <div class="score-text">
+          <strong id="finalScore">0</strong>
+          <span id="totalMarks">/ 200</span>
+          <small id="finalPercentile">95.4 %ile</small>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="kpi-grid">
+      <div class="kpi"><span class="kpi-icon">✅</span><div><strong id="kpiCorrect">0</strong><span>Correct</span></div></div>
+      <div class="kpi"><span class="kpi-icon">❌</span><div><strong id="kpiWrong">0</strong><span>Incorrect</span></div></div>
+      <div class="kpi"><span class="kpi-icon">⏭️</span><div><strong id="kpiSkipped">0</strong><span>Unattempted</span></div></div>
+      <div class="kpi"><span class="kpi-icon">⏱️</span><div><strong id="kpiTime">0:00</strong><span>Time taken</span></div></div>
+      <div class="kpi"><span class="kpi-icon">🏆</span><div><strong id="kpiRank">—</strong><span>All India Rank</span></div></div>
+      <div class="kpi"><span class="kpi-icon">📊</span><div><strong id="kpiAccuracy">0%</strong><span>Accuracy</span></div></div>
+    </div>
+
+    <div class="result-grid">
+      <div class="result-card">
+        <h3>Section-wise breakdown</h3>
+        <div id="sectionBreakdown" class="section-bars"></div>
+      </div>
+
+      <div class="result-card">
+        <h3>Topic-wise performance</h3>
+        <div id="topicBreakdown" class="topic-bars"></div>
+      </div>
+
+      <div class="result-card">
+        <h3>Topper comparison</h3>
+        <p class="muted small">You vs the top 1% of test takers</p>
+        <div id="topperCompare" class="compare-list"></div>
+      </div>
+
+      <div class="result-card ai-report">
+        <h3>🤖 AI Improvement Report</h3>
+        <ul id="aiTips">
+          <li>Loading personalised tips…</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="cta-row">
+      <a href="tests.html" class="btn btn-primary btn-lg">Take another test</a>
+      <a href="test.html" class="btn btn-outline btn-lg">Re-attempt this test</a>
+    </div>
+  </div>
+</section>
+
+<footer class="footer">
+  <div class="container footer-bottom">
+    <small>© 2026 TestHub Education Pvt. Ltd.</small>
+  </div>
+</footer>
+
+<script src="assets/js/data.js"></script>
+<script src="assets/js/app.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', App.renderResult);
+</script>
+</body>
+</html>

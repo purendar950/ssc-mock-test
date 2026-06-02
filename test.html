@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>SSC CGL Tier-I Mock 17 · TestHub</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Poppins:wght@500;600;700;800&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="assets/css/style.css" />
+</head>
+<body class="test-body">
+
+<!-- INSTRUCTIONS MODAL -->
+<div class="modal-backdrop" id="instructionsModal">
+  <div class="modal">
+    <div class="modal-head">
+      <h3>Read the instructions carefully</h3>
+      <button class="icon-btn" id="closeInstr" aria-label="Close">✕</button>
+    </div>
+    <div class="modal-body">
+      <ol class="instructions">
+        <li>The test has <strong>4 sections</strong>: General Intelligence &amp; Reasoning (25 Qs), General Awareness (25 Qs), Quantitative Aptitude (25 Qs), English Comprehension (25 Qs) — total <strong>100 questions</strong>.</li>
+        <li>Total time: <strong>60 minutes</strong>. The timer starts as soon as you click <em>Start Test</em>.</li>
+        <li>Each correct answer carries <strong>+2 marks</strong>; each wrong answer carries <strong>−0.50 marks</strong>. Un-answered questions carry <strong>0</strong>.</li>
+        <li>You can mark a question for review and come back to it later using the question palette.</li>
+        <li>Once submitted, the test cannot be resumed. You can, however, view detailed solutions after submission.</li>
+        <li>Do not refresh the page — your responses may be lost.</li>
+      </ol>
+    </div>
+    <div class="modal-foot">
+      <label class="chk"><input type="checkbox" id="agreeChk" /> I have read and understood the instructions.</label>
+      <button class="btn btn-primary btn-lg" id="startTestBtn" disabled>Start Test →</button>
+    </div>
+  </div>
+</div>
+
+<!-- TEST HEADER -->
+<header class="test-header">
+  <div class="test-header-inner">
+    <div class="test-info">
+      <strong id="testTitle">SSC CGL Tier-I Mock 17</strong>
+      <span class="muted" id="testMeta">100 Qs · 60 min · 200 marks</span>
+    </div>
+    <div class="test-tools">
+      <div class="lang-toggle">
+        <button class="lang-btn active" data-lang="en">English</button>
+        <button class="lang-btn" data-lang="hi">हिंदी</button>
+      </div>
+      <div class="timer" id="timer">60:00</div>
+      <button class="btn btn-ghost" id="submitBtn">Submit Test</button>
+    </div>
+  </div>
+  <div class="progress-strip"><span id="progressBar" style="width:0%"></span></div>
+</header>
+
+<main class="test-main">
+  <div class="test-content">
+    <div class="section-bar">
+      <span class="section-pill" id="sectionPill">Section 1 · General Intelligence &amp; Reasoning</span>
+      <div class="section-nav">
+        <button class="section-btn active" data-section="0">Reasoning</button>
+        <button class="section-btn" data-section="1">GA</button>
+        <button class="section-btn" data-section="2">Quant</button>
+        <button class="section-btn" data-section="3">English</button>
+      </div>
+    </div>
+
+    <div class="q-card" id="qCard">
+      <div class="q-meta">
+        <span class="q-num" id="qNum">Question 1</span>
+        <span class="q-marks">+2 · −0.50</span>
+      </div>
+      <p class="q-text" id="qText">Loading question…</p>
+      <div class="options" id="qOptions"></div>
+      <div class="q-actions">
+        <button class="btn btn-outline" id="markReviewBtn">🔖 Mark for review</button>
+        <button class="btn btn-ghost" id="clearResponseBtn">Clear response</button>
+        <div class="q-actions-right">
+          <button class="btn btn-outline" id="prevBtn">← Previous</button>
+          <button class="btn btn-primary" id="nextBtn">Save &amp; Next →</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <aside class="palette">
+    <h4>Question palette</h4>
+    <p class="muted small">Click a number to jump to that question.</p>
+
+    <div class="legend">
+      <span><i class="dot dot-answered"></i> Answered <span id="cntAnswered">0</span></span>
+      <span><i class="dot dot-marked"></i> Marked <span id="cntMarked">0</span></span>
+      <span><i class="dot dot-not"></i> Not visited <span id="cntNot">0</span></span>
+    </div>
+
+    <div class="palette-grid" id="paletteGrid"></div>
+
+    <div class="palette-summary">
+      <div><strong id="totalAttempted">0</strong><span>Attempted</span></div>
+      <div><strong id="totalUnattempted">0</strong><span>Left</span></div>
+    </div>
+  </aside>
+</main>
+
+<!-- MOBILE PALETTE FAB + MODAL -->
+<button class="palette-fab" id="paletteFab" aria-label="Open palette">📋</button>
+<div class="palette-modal-backdrop" id="paletteModal">
+  <div class="palette-modal">
+    <h4 style="margin-bottom:4px">Question palette</h4>
+    <p class="muted small" style="margin-bottom:12px">Tap a number to jump</p>
+    <div class="legend" style="flex-direction:row;flex-wrap:wrap;gap:10px">
+      <span><i class="dot dot-answered"></i> Answered</span>
+      <span><i class="dot dot-marked"></i> Marked</span>
+      <span><i class="dot dot-not"></i> Not visited</span>
+    </div>
+    <div class="palette-grid" id="paletteGridMobile"></div>
+    <button class="btn btn-primary btn-block" id="paletteCloseBtn" style="margin-top:14px">Close</button>
+  </div>
+</div>
+
+<!-- SUBMIT CONFIRMATION -->
+<div class="modal-backdrop hidden" id="submitModal">
+  <div class="modal modal-sm">
+    <div class="modal-head">
+      <h3>Submit the test?</h3>
+    </div>
+    <div class="modal-body">
+      <p>You have <strong id="unattemptedWarn">0</strong> unanswered question(s). Once submitted, you cannot change your answers.</p>
+      <ul class="summary-list" id="submitSummary"></ul>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-outline" id="cancelSubmit">Continue test</button>
+      <button class="btn btn-accent" id="confirmSubmit">Yes, submit</button>
+    </div>
+  </div>
+</div>
+
+<script src="assets/js/data.js"></script>
+<script src="assets/js/app.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', App.initTest);
+</script>
+</body>
+</html>

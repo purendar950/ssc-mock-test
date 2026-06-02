@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Test Series · Buy Pro Bundles · TestHub</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Poppins:wght@500;600;700;800&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="assets/css/style.css" />
+</head>
+<body>
+
+<header class="topbar">
+  <div class="container topbar-inner">
+    <a href="index.html" class="logo">
+      <span class="logo-mark">T</span>
+      <span class="logo-text">Test<span class="accent">Hub</span></span>
+    </a>
+    <nav class="main-nav">
+      <a href="index.html">Home</a>
+      <a href="tests.html">Mock Tests</a>
+      <a href="series.html" class="active">Test Series</a>
+      <a href="#">PYQs</a>
+      <a href="#">Live Classes</a>
+    </nav>
+    <div class="topbar-actions">
+      <button class="btn btn-ghost">Sign in</button>
+      <a href="buy.html?series=ssc-all-in-one" class="btn btn-accent">Get Pro</a>
+    </div>
+    <button class="hamburger" id="hamburger">☰</button>
+  </div>
+</header>
+
+<section class="page-head">
+  <div class="container">
+    <h1>Test Series &amp; Pro Bundles</h1>
+    <p>Save up to 75% with our carefully curated bundles — designed by SSC toppers &amp; faculty.</p>
+    <div class="breadcrumb"><a href="index.html">Home</a> · <span>Test Series</span></div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="filter-tabs" style="margin-bottom:18px">
+      <button class="tab active" data-tab="all">All Series</button>
+      <button class="tab" data-tab="cgl">SSC CGL</button>
+      <button class="tab" data-tab="chsl">SSC CHSL</button>
+      <button class="tab" data-tab="mts">SSC MTS / GD</button>
+      <button class="tab" data-tab="cpo">SSC CPO</button>
+      <button class="tab" data-tab="all-in-one">All-in-One</button>
+    </div>
+    <div class="series-grid" id="seriesGrid"></div>
+  </div>
+</section>
+
+<!-- COMPARE TABLE -->
+<section class="section section-alt">
+  <div class="container">
+    <div class="section-head"><h2>Compare what's included</h2></div>
+    <div style="overflow-x:auto; background:#fff; border:1px solid var(--border); border-radius:var(--radius)">
+      <table class="table" style="min-width:680px">
+        <thead>
+          <tr><th>Feature</th><th>Free</th><th>Pro</th><th>Mega Pack</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Free mock tests</td><td>2,500+</td><td>2,500+</td><td>2,500+</td></tr>
+          <tr><td>Pro mock tests</td><td>—</td><td>120+</td><td>350+</td></tr>
+          <tr><td>Previous year papers</td><td>Limited</td><td>20+</td><td>Unlimited</td></tr>
+          <tr><td>Live classes</td><td>—</td><td>✓</td><td>Daily</td></tr>
+          <tr><td>Doubt support</td><td>—</td><td>12-hour SLA</td><td>4-hour SLA</td></tr>
+          <tr><td>1-on-1 mentorship</td><td>—</td><td>—</td><td>✓</td></tr>
+          <tr><td>E-books &amp; study notes</td><td>Sample</td><td>50+</td><td>All</td></tr>
+          <tr><td>Price</td><td>₹0</td><td>from ₹299</td><td>₹999</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section class="section">
+  <div class="container">
+    <div class="section-head"><h2>Buying FAQs</h2></div>
+    <div class="faq">
+      <details><summary>How do I pay?</summary><p>UPI, net banking, debit/credit card, wallets. Payments are verified within 30 minutes during business hours.</p></details>
+      <details><summary>When does my access start?</summary><p>Immediately after payment approval — you'll receive an SMS &amp; email with your login details.</p></details>
+      <details><summary>Can I get a refund?</summary><p>Yes, within 7 days of purchase if you've attempted fewer than 3 tests.</p></details>
+      <details><summary>Is the price inclusive of GST?</summary><p>Yes, all prices include 18% GST. A proper invoice is emailed after purchase.</p></details>
+    </div>
+  </div>
+</section>
+
+<footer class="footer">
+  <div class="container footer-bottom">
+    <small>© 2026 TestHub Education Pvt. Ltd.</small>
+  </div>
+</footer>
+
+<script src="assets/js/data.js"></script>
+<script src="assets/js/app.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    App.renderSeries('seriesGrid');
+    document.querySelectorAll('.filter-tabs .tab').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.filter-tabs .tab').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        App.renderSeries('seriesGrid', btn.dataset.tab);
+      });
+    });
+  });
+</script>
+</body>
+</html>

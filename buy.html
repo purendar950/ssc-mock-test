@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Buy Test Series · TestHub</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Poppins:wght@500;600;700;800&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="assets/css/style.css" />
+</head>
+<body>
+
+<header class="topbar">
+  <div class="container topbar-inner">
+    <a href="index.html" class="logo">
+      <span class="logo-mark">T</span>
+      <span class="logo-text">Test<span class="accent">Hub</span></span>
+    </a>
+    <nav class="main-nav">
+      <a href="index.html">Home</a>
+      <a href="tests.html">Mock Tests</a>
+      <a href="series.html" class="active">Test Series</a>
+      <a href="#">PYQs</a>
+    </nav>
+    <div class="topbar-actions">
+      <button class="btn btn-ghost">Sign in</button>
+    </div>
+  </div>
+</header>
+
+<section class="page-head">
+  <div class="container">
+    <h1>Checkout</h1>
+    <p>Complete your purchase to unlock the full test series.</p>
+    <div class="breadcrumb"><a href="index.html">Home</a> · <a href="series.html">Test Series</a> · <span>Checkout</span></div>
+  </div>
+</section>
+
+<section class="section" id="checkoutView">
+  <div class="container buy-layout">
+    <div>
+      <!-- STEP 1: account -->
+      <div class="checkout-card">
+        <h3><span class="num">1</span> Your details</h3>
+        <label>Full name *</label>
+        <input class="input" id="buyerName" placeholder="e.g. Aman Sharma" />
+        <label>Email *</label>
+        <input class="input" id="buyerEmail" type="email" placeholder="aman@example.com" />
+        <label>Mobile number *</label>
+        <input class="input" id="buyerPhone" type="tel" placeholder="98765 43210" />
+      </div>
+
+      <!-- STEP 2: payment method -->
+      <div class="checkout-card">
+        <h3><span class="num">2</span> Payment method</h3>
+        <div class="pay-methods">
+          <div class="pay-method active" data-method="upi">📱<span>UPI</span></div>
+          <div class="pay-method" data-method="netbanking">🏦<span>Net Banking</span></div>
+          <div class="pay-method" data-method="card">💳<span>Card</span></div>
+        </div>
+
+        <div id="payUpi" style="margin-top:12px">
+          <label>UPI ID *</label>
+          <input class="input" id="upiId" placeholder="yourname@okhdfcbank" />
+          <small class="muted" style="display:block;margin-top:6px">Or scan the QR shown on the right →</small>
+        </div>
+
+        <div id="payNetBanking" style="display:none;margin-top:12px">
+          <label>Select bank *</label>
+          <select class="input">
+            <option>State Bank of India</option><option>HDFC Bank</option><option>ICICI Bank</option>
+            <option>Axis Bank</option><option>Punjab National Bank</option><option>Bank of Baroda</option>
+            <option>Other…</option>
+          </select>
+        </div>
+
+        <div id="payCard" style="display:none;margin-top:12px">
+          <label>Card number *</label>
+          <input class="input" placeholder="1234 5678 9012 3456" />
+          <div class="row-2" style="margin-top:0">
+            <div><label>Expiry *</label><input class="input" placeholder="MM/YY" /></div>
+            <div><label>CVV *</label><input class="input" placeholder="•••" type="password" /></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 3: confirm -->
+      <div class="checkout-card">
+        <h3><span class="num">3</span> Review &amp; pay</h3>
+        <p class="muted small" style="margin-bottom:12px">By clicking <strong>Pay now</strong> you agree to our <a href="#" style="color:var(--primary)">Terms</a> and refund policy.</p>
+        <button class="btn btn-accent btn-lg btn-block" id="payBtn">🔒 Pay securely</button>
+      </div>
+    </div>
+
+    <!-- ORDER SUMMARY -->
+    <aside>
+      <div class="order-summary">
+        <h3>Order summary</h3>
+        <div id="orderSeries">
+          <div class="os-row"><span>Series</span><strong id="sumSeries">—</strong></div>
+          <div class="os-row"><span>Validity</span><span id="sumValidity">—</span></div>
+          <div class="os-row"><span>Tests included</span><span id="sumTests">—</span></div>
+        </div>
+
+        <div class="os-row" style="margin-top:8px"><span>Subtotal</span><span id="sumSubtotal">₹0</span></div>
+        <div class="os-row"><span style="color:var(--success)">Discount</span><span style="color:var(--success)" id="sumDiscount">−₹0</span></div>
+
+        <div class="coupon-row">
+          <input class="input" id="couponInput" placeholder="Coupon code" />
+          <button class="btn btn-outline" id="applyCoupon">Apply</button>
+        </div>
+
+        <div class="os-row total"><span>Total payable</span><strong id="sumTotal">₹0</strong></div>
+
+        <hr style="border:0;border-top:1px solid var(--border);margin:14px 0" />
+        <div style="text-align:center">
+          <div class="qr-box">Scan &amp; pay<br />via any UPI app</div>
+          <small class="muted">UPI ID: <strong>payments@testhub</strong></small>
+        </div>
+      </div>
+    </aside>
+  </div>
+</section>
+
+<!-- SUCCESS VIEW -->
+<section class="section hidden" id="successView">
+  <div class="container">
+    <div class="success-card">
+      <div class="success-icon">✓</div>
+      <h2>Order placed successfully!</h2>
+      <p class="muted">Your order <strong id="orderId">ORD-0000</strong> has been received. Our team will verify your payment and activate your account within 30 minutes.</p>
+      <div style="background:var(--bg-soft);border-radius:10px;padding:14px;margin:18px 0;text-align:left">
+        <div class="os-row"><span>Series</span><strong id="okSeries">—</strong></div>
+        <div class="os-row"><span>Amount</span><strong id="okAmount">—</strong></div>
+        <div class="os-row"><span>Transaction ID</span><strong id="okTxn">—</strong></div>
+        <div class="os-row"><span>Status</span><span class="badge badge-pending">Pending approval</span></div>
+      </div>
+      <p class="muted small">You will receive an email &amp; SMS once your payment is approved. Until then, you can browse the <a href="series.html" style="color:var(--primary)">test series</a> or take a <a href="tests.html" style="color:var(--primary)">free test</a>.</p>
+      <div style="display:flex;gap:10px;justify-content:center;margin-top:18px;flex-wrap:wrap">
+        <a href="tests.html" class="btn btn-primary">Take a free test</a>
+        <a href="index.html" class="btn btn-outline">Go home</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer class="footer">
+  <div class="container footer-bottom">
+    <small>© 2026 TestHub Education Pvt. Ltd. · Secured by 256-bit SSL</small>
+  </div>
+</footer>
+
+<script src="assets/js/data.js"></script>
+<script src="assets/js/app.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', App.initBuy);
+</script>
+</body>
+</html>

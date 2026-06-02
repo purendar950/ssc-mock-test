@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>All Mock Tests · TestHub</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Poppins:wght@500;600;700;800&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="assets/css/style.css" />
+</head>
+<body>
+
+<header class="topbar">
+  <div class="container topbar-inner">
+    <a href="index.html" class="logo">
+      <span class="logo-mark">T</span>
+      <span class="logo-text">Test<span class="accent">Hub</span></span>
+    </a>
+    <nav class="main-nav">
+      <a href="index.html">Home</a>
+      <a href="tests.html" class="active">Mock Tests</a>
+      <a href="series.html">Test Series</a>
+      <a href="#">PYQs</a>
+      <a href="#">Live Classes</a>
+    </nav>
+    <div class="topbar-actions">
+      <button class="btn btn-ghost">Sign in</button>
+      <a href="series.html" class="btn btn-primary">Buy Series</a>
+    </div>
+    <button class="hamburger" id="hamburger">☰</button>
+  </div>
+</header>
+
+<section class="page-head">
+  <div class="container">
+    <h1>SSC Mock Tests</h1>
+    <p>Practise with the most accurate SSC exam mock tests — crafted by ex-SSC toppers &amp; faculty.</p>
+    <div class="breadcrumb"><a href="index.html">Home</a> · <span>Mock Tests</span></div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container tests-layout">
+    <aside class="filter-panel">
+      <h4>Exams</h4>
+      <label class="chk"><input type="checkbox" data-filter="exam" value="cgl" /> SSC CGL <span>320</span></label>
+      <label class="chk"><input type="checkbox" data-filter="exam" value="chsl" /> SSC CHSL <span>180</span></label>
+      <label class="chk"><input type="checkbox" data-filter="exam" value="mts" /> SSC MTS <span>90</span></label>
+      <label class="chk"><input type="checkbox" data-filter="exam" value="gd" /> SSC GD <span>110</span></label>
+      <label class="chk"><input type="checkbox" data-filter="exam" value="cpo" /> SSC CPO <span>75</span></label>
+      <label class="chk"><input type="checkbox" data-filter="exam" value="steno" /> SSC Steno <span>60</span></label>
+
+      <h4>Type</h4>
+      <label class="chk"><input type="checkbox" data-filter="type" value="free" /> Free <span>2400+</span></label>
+      <label class="chk"><input type="checkbox" data-filter="type" value="pro" /> Pro <span>1100+</span></label>
+      <label class="chk"><input type="checkbox" data-filter="type" value="pyq" /> Previous Year <span>200+</span></label>
+      <label class="chk"><input type="checkbox" data-filter="type" value="live" /> Live Tests <span>12</span></label>
+
+      <h4>Language</h4>
+      <label class="chk"><input type="checkbox" data-filter="lang" value="en" /> English</label>
+      <label class="chk"><input type="checkbox" data-filter="lang" value="hi" /> Hindi</label>
+      <label class="chk"><input type="checkbox" data-filter="lang" value="bi" /> Bilingual</label>
+
+      <button class="btn btn-outline btn-block" id="clearFilters">Clear filters</button>
+    </aside>
+
+    <div class="tests-main">
+      <div class="search-row">
+        <input id="searchInput" type="search" placeholder="Search tests e.g. SSC CGL Tier-I 2026" />
+        <select id="sortBy">
+          <option value="popular">Most popular</option>
+          <option value="newest">Newest first</option>
+          <option value="rating">Top rated</option>
+        </select>
+      </div>
+      <div class="test-list" id="testList"></div>
+    </div>
+  </div>
+</section>
+
+<footer class="footer">
+  <div class="container footer-bottom">
+    <small>© 2026 TestHub Education Pvt. Ltd.</small>
+  </div>
+</footer>
+
+<script src="assets/js/data.js"></script>
+<script src="assets/js/app.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    App.renderTestList('testList');
+    App.attachFilters();
+  });
+</script>
+</body>
+</html>
