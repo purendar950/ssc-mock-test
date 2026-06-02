@@ -10,19 +10,17 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Poppins:wght@500;600;700;800&display=swap" rel="stylesheet" />
 <link rel="stylesheet" href="assets/css/style.css" />
 <style>
-/* ====== DARK TEST INTERFACE (overrides for test page) ====== */
 body.test-body { background: #0d0d0d; color: #fff; }
-.test-body { background: #0d0d0d; color: #fff; }
 </style>
 </head>
 <body class="test-body">
 
 <!-- INSTRUCTIONS MODAL -->
-<div class="modal-backdrop" id="instructionsModal">
+<div class="modal-backdrop" id="instructionsModal" data-modal="instructions" hidden>
   <div class="modal">
     <div class="modal-head">
       <h3>Read the instructions carefully</h3>
-      <button class="icon-btn" id="closeInstr" aria-label="Close">✕</button>
+      <button class="icon-btn" data-modal-close="instructions" aria-label="Close">✕</button>
     </div>
     <div class="modal-body">
       <ol class="instructions">
@@ -41,7 +39,7 @@ body.test-body { background: #0d0d0d; color: #fff; }
   </div>
 </div>
 
-<!-- ============ TEST HEADER (DARK) ============ -->
+<!-- TEST HEADER (DARK) -->
 <header class="th">
   <div class="th-top">
     <button class="th-pause" id="pauseBtn" aria-label="Pause"><svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></svg></button>
@@ -49,12 +47,12 @@ body.test-body { background: #0d0d0d; color: #fff; }
       <div class="th-timer" id="timer">01:00:00</div>
       <div class="th-name" id="testTitle">RRB NTPC (Graduate) 2025: Evening…</div>
     </div>
-    <button class="th-icon-btn" id="calcBtn" aria-label="Calculator">
+    <button class="th-icon-btn" id="calcBtn" aria-label="Calculator" data-modal-open="calc">
       <span style="font-family:'Poppins';font-size:11px;font-weight:700">E</span>
       <span style="font-size:13px;margin:0 2px">अ</span>
       <span style="font-size:11px;font-weight:700">A</span>
     </button>
-    <button class="th-icon-btn" id="menuBtn" aria-label="Menu">
+    <button class="th-icon-btn" id="menuBtn" aria-label="Menu" data-modal-open="drawer">
       <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
     </button>
   </div>
@@ -76,7 +74,7 @@ body.test-body { background: #0d0d0d; color: #fff; }
   </div>
 </header>
 
-<!-- ============ MAIN QUESTION AREA ============ -->
+<!-- MAIN QUESTION AREA -->
 <main class="tm">
   <div class="q-wrap" id="qCard">
     <p class="q-text" id="qText">Loading question…</p>
@@ -84,22 +82,22 @@ body.test-body { background: #0d0d0d; color: #fff; }
   </div>
 </main>
 
-<!-- ============ BOTTOM ACTION BAR ============ -->
+<!-- BOTTOM ACTION BAR -->
 <nav class="ta">
   <button class="ta-btn" id="markReviewBtn"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 3h12v18l-6-4-6 4V3z"/></svg>Mark &amp; Next</button>
   <button class="ta-btn" id="clearResponseBtn">Clear</button>
   <button class="ta-btn ta-btn-primary" id="nextBtn">Save &amp; Next →</button>
 </nav>
 
-<!-- ============ MOBILE MENU DRAWER ============ -->
-<div class="m-drawer-backdrop" id="mDrawer">
+<!-- MOBILE MENU DRAWER -->
+<div class="m-drawer-backdrop" id="drawerModal" data-modal="drawer" hidden>
   <div class="m-drawer">
     <div class="m-drawer-head">
       <strong>Quick menu</strong>
-      <button class="icon-btn" data-pm="close" aria-label="Close">✕</button>
+      <button class="icon-btn" data-modal-close="drawer" aria-label="Close">✕</button>
     </div>
     <div class="m-drawer-body">
-      <button class="m-drawer-item" data-pm="open-palette">
+      <button class="m-drawer-item" data-modal-open="palette">
         <span class="mdi-ico">📋</span>
         <div><strong>Question palette</strong><small>Jump to any question</small></div>
       </button>
@@ -115,7 +113,7 @@ body.test-body { background: #0d0d0d; color: #fff; }
         <span class="mdi-ico">ℹ️</span>
         <div><strong>Instructions</strong><small>View test instructions</small></div>
       </button>
-      <button class="m-drawer-item m-danger" id="mSubmit">
+      <button class="m-drawer-item m-danger" data-modal-open="submit">
         <span class="mdi-ico">✓</span>
         <div><strong>Submit test</strong><small>End the test now</small></div>
       </button>
@@ -123,12 +121,12 @@ body.test-body { background: #0d0d0d; color: #fff; }
   </div>
 </div>
 
-<!-- ============ CALCULATOR ============ -->
-<div class="calc-backdrop" id="calcModal">
+<!-- CALCULATOR -->
+<div class="calc-backdrop" id="calcModal" data-modal="calc" hidden>
   <div class="calc">
     <div class="calc-head">
       <strong>Calculator</strong>
-      <button class="icon-btn" data-pm="close" aria-label="Close">✕</button>
+      <button class="icon-btn" data-modal-close="calc" aria-label="Close">✕</button>
     </div>
     <div class="calc-display" id="calcDisplay">0</div>
     <div class="calc-grid">
@@ -156,16 +154,16 @@ body.test-body { background: #0d0d0d; color: #fff; }
   </div>
 </div>
 
-<!-- ============ PALETTE (MOBILE BOTTOM SHEET) ============ -->
-<div class="palette-modal-backdrop" id="paletteModal" data-pm="backdrop">
-  <div class="palette-modal" data-pm="sheet">
+<!-- PALETTE (BOTTOM SHEET) -->
+<div class="palette-modal-backdrop" id="paletteModal" data-modal="palette" hidden>
+  <div class="palette-modal">
     <div class="pm-head">
       <div class="pm-handle"></div>
       <div class="pm-title">
         <strong>Question palette</strong>
         <span class="muted small">Tap a number · Tap outside to close</span>
       </div>
-      <button class="pm-close" data-pm="close" aria-label="Close">✕</button>
+      <button class="pm-close" data-modal-close="palette" aria-label="Close">✕</button>
     </div>
     <div class="pm-stats">
       <div><strong id="pmAns">0</strong><span>Answered</span></div>
@@ -179,34 +177,35 @@ body.test-body { background: #0d0d0d; color: #fff; }
       <span><i class="dot dot-not"></i> Not visited</span>
     </div>
     <div class="pm-sections" id="pmSections">
-      <button class="pm-jump active" data-jump="all" data-pm="jump">All</button>
-      <button class="pm-jump" data-jump="0" data-pm="jump">Reasoning (1–25)</button>
-      <button class="pm-jump" data-jump="1" data-pm="jump">GA (26–50)</button>
-      <button class="pm-jump" data-jump="2" data-pm="jump">Quant (51–75)</button>
-      <button class="pm-jump" data-jump="3" data-pm="jump">English (76–100)</button>
+      <button class="pm-jump active" data-jump="all" data-pm-jump>All</button>
+      <button class="pm-jump" data-jump="0" data-pm-jump>Reasoning (1–25)</button>
+      <button class="pm-jump" data-jump="1" data-pm-jump>GA (26–50)</button>
+      <button class="pm-jump" data-jump="2" data-pm-jump>Quant (51–75)</button>
+      <button class="pm-jump" data-jump="3" data-pm-jump>English (76–100)</button>
     </div>
     <div class="pm-body">
       <div class="palette-grid" id="paletteGridMobile"></div>
     </div>
     <div class="pm-foot">
-      <button class="btn btn-outline pm-close-btn" data-pm="close">✕ Close</button>
-      <button class="btn btn-accent" id="pmSubmit" data-pm="submit">Submit Test</button>
+      <button class="btn btn-outline pm-close-btn" data-modal-close="palette">✕ Close</button>
+      <button class="btn btn-accent" id="pmSubmit" data-modal-open="submit">Submit Test</button>
     </div>
   </div>
 </div>
 
-<!-- ============ SUBMIT CONFIRMATION ============ -->
-<div class="modal-backdrop hidden" id="submitModal">
+<!-- SUBMIT CONFIRMATION -->
+<div class="modal-backdrop hidden" id="submitModal" data-modal="submit" hidden>
   <div class="modal modal-sm">
     <div class="modal-head">
       <h3>Submit the test?</h3>
+      <button class="icon-btn" data-modal-close="submit" aria-label="Close">✕</button>
     </div>
     <div class="modal-body">
       <p>You have <strong id="unattemptedWarn">0</strong> unanswered question(s). Once submitted, you cannot change your answers.</p>
       <ul class="summary-list" id="submitSummary"></ul>
     </div>
     <div class="modal-foot">
-      <button class="btn btn-outline" id="cancelSubmit">Continue test</button>
+      <button class="btn btn-outline" data-modal-close="submit">Continue test</button>
       <button class="btn btn-accent" id="confirmSubmit">Yes, submit</button>
     </div>
   </div>

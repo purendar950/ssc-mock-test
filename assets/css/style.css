@@ -498,6 +498,13 @@ body.test-body, .test-body {
   min-height: 100vh;
 }
 
+/* Bulletproof modal hiding — [hidden] wins over every other rule */
+[data-modal][hidden],
+.palette-modal-backdrop[hidden],
+.m-drawer-backdrop[hidden],
+.calc-backdrop[hidden],
+.modal-backdrop[hidden] { display: none !important; }
+
 /* === HEADER === */
 .th {
   position: sticky; top: 0; z-index: 50;

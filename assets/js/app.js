@@ -186,6 +186,51 @@
   /* ============== TEST PAGE: take test (DARK THEME) ============== */
   let state = null;
 
+  /* ---- UNIFIED MODAL SYSTEM (bulletproof open/close) ---- */
+  const MODAL_IDS = {
+    instructions: 'instructionsModal',
+    palette: 'paletteModal',
+    drawer: 'drawerModal',
+    calc: 'calcModal',
+    submit: 'submitModal'
+  };
+
+  App.modal = {
+    open(name) {
+      const m = document.getElementById(MODAL_IDS[name]);
+      if (!m) return;
+      m.classList.add('show');
+      m.removeAttribute('hidden');
+      m.setAttribute('aria-hidden', 'false');
+      if (name === 'calc') resetCalc();
+      if (name === 'palette') App.renderPalette();
+    },
+    close(name) {
+      const m = document.getElementById(MODAL_IDS[name]);
+      if (!m) return;
+      m.classList.remove('show');
+      m.setAttribute('hidden', '');
+      m.setAttribute('aria-hidden', 'true');
+      // Remove any leftover closing animation classes
+      m.querySelectorAll('.closing, .palette-modal.closing').forEach(el => el.classList.remove('closing'));
+    },
+    closeAll() {
+      Object.keys(MODAL_IDS).forEach(n => App.modal.close(n));
+    },
+    isOpen(name) {
+      const m = document.getElementById(MODAL_IDS[name]);
+      return m && !m.hasAttribute('hidden');
+    }
+  };
+
+  /* Old-style helpers — keep names so existing code still works */
+  App.openPalette = () => App.modal.open('palette');
+  App.closePalette = () => App.modal.close('palette');
+  App.openDrawer   = () => App.modal.open('drawer');
+  App.closeDrawer  = () => App.modal.close('drawer');
+  App.openCalc     = () => App.modal.open('calc');
+  App.closeCalc    = () => App.modal.close('calc');
+
   App.initTest = function () {
     const bank = QUESTIONS_BANK.cgl17;
     state = {
@@ -198,28 +243,31 @@
       starred: new Array(bank.questions.length).fill(false),
       reported: new Array(bank.questions.length).fill(false),
       timeLeft: bank.duration * 60,
-      qTimeAt: Date.now(),  // when current question opened
-      qTimeSpent: new Array(bank.questions.length).fill(0),  // accumulated seconds
+      qTimeAt: Date.now(),
+      qTimeSpent: new Array(bank.questions.length).fill(0),
       timerId: null,
       qTimerId: null,
       paused: false
     };
     state.visited[0] = true;
 
-    // Title
+    // Show instructions on load
+    const instructionsEl = document.getElementById('instructionsModal');
+    if (instructionsEl) {
+      instructionsEl.removeAttribute('hidden');
+      instructionsEl.classList.add('show');
+    }
+
+    // Title in header
     const titleEl = document.getElementById('testTitle');
     if (titleEl) titleEl.textContent = state.test.title;
-    document.getElementById('testTitle2') && (document.getElementById('testTitle2').textContent = state.test.title);
 
-    // Instructions modal
-    const modal = document.getElementById('instructionsModal');
+    // Start button
     const agree = document.getElementById('agreeChk');
     const start = document.getElementById('startTestBtn');
-    const close = document.getElementById('closeInstr');
     agree.addEventListener('change', () => start.disabled = !agree.checked);
-    close.addEventListener('click', () => modal.style.display = 'none');
     start.addEventListener('click', () => {
-      modal.style.display = 'none';
+      App.modal.close('instructions');
       App.startTimer();
       App.startQTimer();
       App.renderQuestion();
@@ -248,19 +296,11 @@
     // Pause
     document.getElementById('pauseBtn').addEventListener('click', App.togglePause);
 
-    // Calculator
-    document.getElementById('calcBtn').addEventListener('click', () => {
-      App.openCalc();
-    });
-    document.getElementById('menuBtn').addEventListener('click', () => {
-      App.openDrawer();
-    });
-
-    // Drawer items
+    // Drawer items (language, sections, instructions)
     document.querySelectorAll('[data-action]').forEach(btn => {
       btn.addEventListener('click', () => {
         const a = btn.dataset.action;
-        App.closeDrawer();
+        App.modal.close('drawer');
         if (a === 'lang') {
           const cur = document.getElementById('mLangLabel').textContent;
           const next = cur === 'English' ? 'हिंदी' : 'English';
@@ -273,72 +313,35 @@
             App.renderQuestion();
           }
         } else if (a === 'instructions') {
-          document.getElementById('instructionsModal').style.display = 'grid';
+          App.modal.open('instructions');
         }
       });
     });
-    document.querySelectorAll('[data-pm="open-palette"]').forEach(btn => {
-      btn.addEventListener('click', () => { App.closeDrawer(); App.openPalette(); });
-    });
-    document.getElementById('mSubmit')?.addEventListener('click', () => {
-      App.closeDrawer();
-      App.openSubmit();
-    });
 
-    // Submit flow
-    document.getElementById('cancelSubmit').addEventListener('click', () => {
-      document.getElementById('submitModal').classList.add('hidden');
-    });
+    // Submit confirm
     document.getElementById('confirmSubmit').addEventListener('click', App.submitTest);
 
-    // Palette
-    App.openPalette = function () {
-      App.renderPalette();
-      const m = document.getElementById('paletteModal');
-      if (!m) return;
-      m.classList.add('show');
-      const sheet = m.querySelector('.palette-modal');
-      if (sheet) sheet.classList.remove('closing');
-    };
-    App.closePalette = function () {
-      const m = document.getElementById('paletteModal');
-      if (!m) return;
-      const sheet = m.querySelector('.palette-modal');
-      if (sheet) {
-        sheet.classList.add('closing');
-        setTimeout(() => {
-          m.classList.remove('show');
-          sheet.classList.remove('closing');
-        }, 230);
-      } else {
-        m.classList.remove('show');
-      }
-    };
-
-    // Drawer
-    App.openDrawer = function () { document.getElementById('mDrawer')?.classList.add('show'); };
-    App.closeDrawer = function () { document.getElementById('mDrawer')?.classList.remove('show'); };
-
-    // Calculator
-    App.openCalc = function () { document.getElementById('calcModal')?.classList.add('show'); resetCalc(); };
-    App.closeCalc = function () { document.getElementById('calcModal')?.classList.remove('show'); };
-
-    // Delegated handlers
+    // =========== DELEGATED HANDLERS (work for any element) ===========
     document.addEventListener('click', (e) => {
-      const closer = e.target.closest('[data-pm="close"]');
-      if (closer) {
+      // 1. data-modal-close="<name>" → close that specific modal
+      const closeBtn = e.target.closest('[data-modal-close]');
+      if (closeBtn) {
         e.preventDefault(); e.stopPropagation();
-        const m = document.getElementById('paletteModal');
-        const d = document.getElementById('mDrawer');
-        const c = document.getElementById('calcModal');
-        if (m?.classList.contains('show')) App.closePalette();
-        else if (d?.classList.contains('show')) App.closeDrawer();
-        else if (c?.classList.contains('show')) App.closeCalc();
+        App.modal.close(closeBtn.dataset.modalClose);
         return;
       }
-      const submitBtn = e.target.closest('[data-pm="submit"]');
-      if (submitBtn) { e.preventDefault(); App.closePalette(); App.openSubmit(); return; }
-      const jump = e.target.closest('[data-pm="jump"]');
+      // 2. data-modal-open="<name>" → close all then open
+      const openBtn = e.target.closest('[data-modal-open]');
+      if (openBtn) {
+        e.preventDefault(); e.stopPropagation();
+        const which = openBtn.dataset.modalOpen;
+        // For most modals, close the drawer first if it's open
+        if (which !== 'drawer' && App.modal.isOpen('drawer')) App.modal.close('drawer');
+        App.modal.open(which);
+        return;
+      }
+      // 3. Palette jump pills
+      const jump = e.target.closest('[data-pm-jump]');
       if (jump) {
         e.preventDefault();
         document.querySelectorAll('.pm-jump').forEach(b => b.classList.remove('active'));
@@ -351,30 +354,31 @@
           state.current = startIdx;
           state.visited[startIdx] = true;
           App.renderQuestion();
-          App.closePalette();
+          App.modal.close('palette');
         }
         return;
       }
-      if (e.target.dataset?.pm === 'backdrop' && e.target.classList.contains('show')) {
-        e.target.classList.remove('show');
+      // 4. Tap on backdrop area (outside the sheet) closes
+      const backdrop = e.target.closest('[data-modal]');
+      if (backdrop && e.target === backdrop) {
+        App.modal.close(backdrop.dataset.modal);
         return;
       }
-      // Calculator buttons
+      // 5. Calculator key
       const calcKey = e.target.closest('[data-k]');
       if (calcKey) { e.preventDefault(); calcPress(calcKey.dataset.k); return; }
     });
 
-    // Escape closes any open modal
+    // Escape closes top-most open modal (or pause if none)
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') {
-        if (document.getElementById('paletteModal')?.classList.contains('show')) App.closePalette();
-        else if (document.getElementById('mDrawer')?.classList.contains('show')) App.closeDrawer();
-        else if (document.getElementById('calcModal')?.classList.contains('show')) App.closeCalc();
+        const open = ['submit', 'calc', 'palette', 'drawer', 'instructions']
+          .find(n => App.modal.isOpen(n));
+        if (open) App.modal.close(open);
         else if (state.paused) App.togglePause();
         return;
       }
-      // Arrow keys for prev/next
-      if (!['INPUT','TEXTAREA'].includes(e.target.tagName || '')) {
+      if (!['INPUT', 'TEXTAREA'].includes(e.target.tagName || '')) {
         if (e.key === 'ArrowRight' || e.key === 'ArrowDown') { e.preventDefault(); App.navigate(1); }
         else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') { e.preventDefault(); App.navigate(-1); }
       }
@@ -388,7 +392,7 @@
       head.addEventListener('touchend', (e) => {
         if (startY === null) return;
         const dy = (e.changedTouches[0].clientY - startY);
-        if (dy > 60) App.closePalette();
+        if (dy > 60) App.modal.close('palette');
         startY = null;
       });
     }
@@ -419,6 +423,7 @@
 
   /* === PAUSE === */
   App.togglePause = function () {
+    if (!state) return;
     state.paused = !state.paused;
     const btn = document.getElementById('pauseBtn');
     if (state.paused) {
@@ -437,7 +442,7 @@
     state.timerId = setInterval(App.tickMain, 1000);
   };
   App.tickMain = function () {
-    if (state.paused) return;
+    if (!state || state.paused) return;
     const t = document.getElementById('timer');
     const h = Math.floor(state.timeLeft / 3600);
     const m = Math.floor((state.timeLeft % 3600) / 60);
@@ -452,7 +457,7 @@
     state.qTimerId = setInterval(App.tickQ, 1000);
   };
   App.tickQ = function () {
-    if (state.paused) return;
+    if (!state || state.paused) return;
     const el = document.getElementById('qTimeSpent');
     if (!el) return;
     const sec = state.qTimeSpent[state.current] + Math.floor((Date.now() - state.qTimeAt) / 1000);
@@ -463,7 +468,6 @@
 
   App.renderQuestion = function () {
     if (!state) return;
-    // Save time spent on previous question
     if (state.qTimeAt) {
       const spent = Math.floor((Date.now() - state.qTimeAt) / 1000);
       state.qTimeSpent[state.current] = (state.qTimeSpent[state.current] || 0) + spent;
@@ -489,21 +493,17 @@
       });
     });
 
-    // Update icon states
     document.getElementById('bookmarkBtn').classList.toggle('active', !!state.bookmarked[state.current]);
     document.getElementById('starBtn').classList.toggle('active', !!state.starred[state.current]);
     document.getElementById('reportBtn').classList.toggle('active', !!state.reported[state.current]);
 
-    // Update qTimeSpent display for this question
     const el = document.getElementById('qTimeSpent');
     if (el) {
       const sec = state.qTimeSpent[state.current] || 0;
       el.textContent = `${String(Math.floor(sec/60)).padStart(2,'0')}:${String(sec%60).padStart(2,'0')}`;
     }
 
-    // Trigger scroll-to-top on mobile
     document.querySelector('.tm')?.scrollTo({ top: 0, behavior: 'smooth' });
-
     App.renderPalette();
   };
 
@@ -532,27 +532,24 @@
 
   App.renderPalette = function () {
     if (!state) return;
-    const buildGrid = (targetId) => {
-      const grid = document.getElementById(targetId);
-      if (!grid) return;
-      grid.innerHTML = state.test.questions.map((q, i) => {
-        const isAns = state.answers[i] !== null;
-        let cls = 'p-btn';
-        if (i === state.current) cls += ' current';
-        if (isAns) cls += ' answered';
-        if (state.marked[i]) cls += isAns ? ' ans-marked' : ' marked';
-        return `<button class="${cls}" data-i="${i}">${i + 1}</button>`;
-      }).join('');
-      grid.querySelectorAll('.p-btn').forEach(b => {
-        b.addEventListener('click', () => {
-          state.visited[+b.dataset.i] = true;
-          state.current = +b.dataset.i;
-          App.renderQuestion();
-          App.closePalette();
-        });
+    const grid = document.getElementById('paletteGridMobile');
+    if (!grid) return;
+    grid.innerHTML = state.test.questions.map((q, i) => {
+      const isAns = state.answers[i] !== null;
+      let cls = 'p-btn';
+      if (i === state.current) cls += ' current';
+      if (isAns) cls += ' answered';
+      if (state.marked[i]) cls += isAns ? ' ans-marked' : ' marked';
+      return `<button class="${cls}" data-i="${i}">${i + 1}</button>`;
+    }).join('');
+    grid.querySelectorAll('.p-btn').forEach(b => {
+      b.addEventListener('click', () => {
+        state.visited[+b.dataset.i] = true;
+        state.current = +b.dataset.i;
+        App.renderQuestion();
+        App.modal.close('palette');
       });
-    };
-    buildGrid('paletteGridMobile');
+    });
 
     const answered = state.answers.filter(a => a !== null).length;
     const marked = state.marked.filter(Boolean).length;
@@ -575,7 +572,7 @@
       <li><span>Unattempted</span><strong style="color:var(--danger)">${unanswered}</strong></li>
       <li><span>Marked for review</span><strong style="color:var(--accent)">${marked}</strong></li>
     `;
-    document.getElementById('submitModal').classList.remove('hidden');
+    App.modal.open('submit');
   };
 
   App.submitTest = function () {
