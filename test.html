@@ -154,41 +154,48 @@ body.test-body { background: #0d0d0d; color: #fff; }
   </div>
 </div>
 
-<!-- PALETTE (BOTTOM SHEET) -->
-<div class="palette-modal-backdrop" id="paletteModal" data-modal="palette" hidden>
-  <div class="palette-modal">
-    <div class="pm-head">
-      <div class="pm-handle"></div>
-      <div class="pm-title">
-        <strong>Question palette</strong>
-        <span class="muted small">Tap a number · Tap outside to close</span>
+<!-- PALETTE (RIGHT-SIDE DRAWER — Testbook style) -->
+<div class="pd" id="paletteModal" data-modal="palette" hidden>
+  <div class="pd-content">
+    <div class="pd-header">
+      <div class="pd-tabs">
+        <button class="pd-tab active" data-pd-view="grid">Grid View</button>
+        <button class="pd-tab" data-pd-view="list">List View</button>
       </div>
-      <button class="pm-close" data-modal-close="palette" aria-label="Close">✕</button>
+      <button class="pd-close" data-modal-close="palette" aria-label="Close">✕</button>
     </div>
-    <div class="pm-stats">
-      <div><strong id="pmAns">0</strong><span>Answered</span></div>
-      <div><strong id="pmMark">0</strong><span>Marked</span></div>
-      <div><strong id="pmLeft">0</strong><span>Left</span></div>
+
+    <div class="pd-instructions" id="pdInstructions" data-action="instructions">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><circle cx="12" cy="16" r=".7" fill="currentColor"/></svg>
+      <span>View Instructions</span>
     </div>
-    <div class="pm-legend">
-      <span><i class="dot dot-answered"></i> Answered</span>
-      <span><i class="dot dot-marked"></i> Marked</span>
-      <span><i class="dot dot-current"></i> Current</span>
-      <span><i class="dot dot-not"></i> Not visited</span>
+
+    <div class="pd-legend">
+      <div class="pd-leg-item"><span class="pd-leg-ico" style="color:#ff4757">★</span><span>Marked for Review</span></div>
+      <div class="pd-leg-item"><span class="pd-leg-ico" style="color:#9ca3af">●</span><span>Unattempted</span></div>
+      <div class="pd-leg-item"><span class="pd-leg-ico pd-leg-empty">●</span><span>Unseen</span></div>
+      <div class="pd-leg-item"><span class="pd-leg-ico" style="color:#4d8eff">●</span><span>Attempted</span></div>
     </div>
-    <div class="pm-sections" id="pmSections">
-      <button class="pm-jump active" data-jump="all" data-pm-jump>All</button>
-      <button class="pm-jump" data-jump="0" data-pm-jump>Reasoning (1–25)</button>
-      <button class="pm-jump" data-jump="1" data-pm-jump>GA (26–50)</button>
-      <button class="pm-jump" data-jump="2" data-pm-jump>Quant (51–75)</button>
-      <button class="pm-jump" data-jump="3" data-pm-jump>English (76–100)</button>
+
+    <div class="pd-section">
+      <div class="pd-section-head" id="pdSectionToggle">
+        <span>Test</span>
+        <svg class="pd-chev" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+      </div>
+      <div class="pd-section-body">
+        <div class="pd-stats">
+          <div class="pd-stat"><span style="color:#ff4757">★</span><span id="pdMarked">0</span></div>
+          <div class="pd-stat"><span style="color:#4d8eff">●</span><span id="pdAttempted">0</span></div>
+          <div class="pd-stat"><span style="color:#9ca3af">●</span><span id="pdUnattempted">0</span></div>
+          <div class="pd-stat"><span class="pd-leg-empty">●</span><span id="pdUnseen">0</span></div>
+        </div>
+        <div class="pd-grid" id="paletteGridMobile"></div>
+        <div class="pd-list" id="paletteListMobile" hidden></div>
+      </div>
     </div>
-    <div class="pm-body">
-      <div class="palette-grid" id="paletteGridMobile"></div>
-    </div>
-    <div class="pm-foot">
-      <button class="btn btn-outline pm-close-btn" data-modal-close="palette">✕ Close</button>
-      <button class="btn btn-accent" id="pmSubmit" data-modal-open="submit">Submit Test</button>
+
+    <div class="pd-submit">
+      <button data-modal-open="submit">SUBMIT TEST</button>
     </div>
   </div>
 </div>

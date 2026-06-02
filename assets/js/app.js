@@ -203,7 +203,10 @@
       m.removeAttribute('hidden');
       m.setAttribute('aria-hidden', 'false');
       if (name === 'calc') resetCalc();
-      if (name === 'palette') App.renderPalette();
+      if (name === 'palette') {
+        App.renderPalette();
+        App.setPaletteView('grid');
+      }
     },
     close(name) {
       const m = document.getElementById(MODAL_IDS[name]);
@@ -211,8 +214,6 @@
       m.classList.remove('show');
       m.setAttribute('hidden', '');
       m.setAttribute('aria-hidden', 'true');
-      // Remove any leftover closing animation classes
-      m.querySelectorAll('.closing, .palette-modal.closing').forEach(el => el.classList.remove('closing'));
     },
     closeAll() {
       Object.keys(MODAL_IDS).forEach(n => App.modal.close(n));
@@ -340,34 +341,43 @@
         App.modal.open(which);
         return;
       }
-      // 3. Palette jump pills
-      const jump = e.target.closest('[data-pm-jump]');
-      if (jump) {
+      // 3. Palette view tabs (Grid / List)
+      const view = e.target.closest('[data-pd-view]');
+      if (view) {
         e.preventDefault();
-        document.querySelectorAll('.pm-jump').forEach(b => b.classList.remove('active'));
-        jump.classList.add('active');
-        const body = document.querySelector('.pm-body');
-        if (body) body.scrollTo({ top: 0, behavior: 'smooth' });
-        if (jump.dataset.jump !== 'all') {
-          const secIdx = +jump.dataset.jump;
-          const startIdx = bank.sections[secIdx].questions[0] - 1;
-          state.current = startIdx;
-          state.visited[startIdx] = true;
-          App.renderQuestion();
-          App.modal.close('palette');
-        }
+        App.setPaletteView(view.dataset.pdView);
         return;
       }
-      // 4. Tap on backdrop area (outside the sheet) closes
+      // 4. Palette section header collapse
+      const secHead = e.target.closest('#pdSectionToggle');
+      if (secHead) {
+        e.preventDefault();
+        App.togglePaletteSection();
+        return;
+      }
+      // 5. Tap on backdrop area (outside the sheet) closes
       const backdrop = e.target.closest('[data-modal]');
       if (backdrop && e.target === backdrop) {
         App.modal.close(backdrop.dataset.modal);
         return;
       }
-      // 5. Calculator key
+      // 6. Calculator key
       const calcKey = e.target.closest('[data-k]');
       if (calcKey) { e.preventDefault(); calcPress(calcKey.dataset.k); return; }
     });
+
+    // Swipe-right on palette drawer header to close (natural mobile gesture for right drawer)
+    const pdHead = document.querySelector('.pd-header');
+    if (pdHead) {
+      let startX = null;
+      pdHead.addEventListener('touchstart', (e) => { startX = e.touches[0].clientX; }, { passive: true });
+      pdHead.addEventListener('touchend', (e) => {
+        if (startX === null) return;
+        const dx = (e.changedTouches[0].clientX - startX);
+        if (dx < -60) App.modal.close('palette');
+        startX = null;
+      });
+    }
 
     // Escape closes top-most open modal (or pause if none)
     document.addEventListener('keydown', (e) => {
@@ -383,19 +393,6 @@
         else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') { e.preventDefault(); App.navigate(-1); }
       }
     });
-
-    // Swipe-down on palette sheet header
-    const head = document.querySelector('.pm-head');
-    if (head) {
-      let startY = null;
-      head.addEventListener('touchstart', (e) => { startY = e.touches[0].clientY; }, { passive: true });
-      head.addEventListener('touchend', (e) => {
-        if (startY === null) return;
-        const dy = (e.changedTouches[0].clientY - startY);
-        if (dy > 60) App.modal.close('palette');
-        startY = null;
-      });
-    }
 
     App.renderPalette();
     App.renderQuestion();
@@ -530,19 +527,44 @@
     App.navigate(1);
   };
 
+  /* Compute one of 4 states for each question in priority order:
+     marked (red star) > attempted (blue) > unattempted (gray) > unseen (outline) */
+  function qState(i) {
+    if (state.marked[i]) return 'marked';
+    if (state.answers[i] !== null) return 'attempted';
+    if (state.visited[i]) return 'unattempted';
+    return 'unseen';
+  }
+
   App.renderPalette = function () {
     if (!state) return;
     const grid = document.getElementById('paletteGridMobile');
+    const list = document.getElementById('paletteListMobile');
     if (!grid) return;
-    grid.innerHTML = state.test.questions.map((q, i) => {
-      const isAns = state.answers[i] !== null;
-      let cls = 'p-btn';
-      if (i === state.current) cls += ' current';
-      if (isAns) cls += ' answered';
-      if (state.marked[i]) cls += isAns ? ' ans-marked' : ' marked';
-      return `<button class="${cls}" data-i="${i}">${i + 1}</button>`;
+
+    // ---- 4 counters ----
+    let cMarked = 0, cAttempted = 0, cUnattempted = 0, cUnseen = 0;
+    state.test.questions.forEach((_, i) => {
+      const s = qState(i);
+      if (s === 'marked') cMarked++;
+      else if (s === 'attempted') cAttempted++;
+      else if (s === 'unattempted') cUnattempted++;
+      else cUnseen++;
+    });
+    const set = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
+    set('pdMarked', cMarked);
+    set('pdAttempted', cAttempted);
+    set('pdUnattempted', cUnattempted);
+    set('pdUnseen', cUnseen);
+
+    // ---- Grid view: circles with state + red star for marked ----
+    grid.innerHTML = state.test.questions.map((_, i) => {
+      const s = qState(i);
+      const isCurrent = i === state.current;
+      const star = s === 'marked' ? '<span class="pd-star">★</span>' : '';
+      return `<button class="pd-q ${s}${isCurrent ? ' current' : ''}" data-i="${i}" title="Question ${i + 1}">${i + 1}${star}</button>`;
     }).join('');
-    grid.querySelectorAll('.p-btn').forEach(b => {
+    grid.querySelectorAll('.pd-q').forEach(b => {
       b.addEventListener('click', () => {
         state.visited[+b.dataset.i] = true;
         state.current = +b.dataset.i;
@@ -551,13 +573,58 @@
       });
     });
 
-    const answered = state.answers.filter(a => a !== null).length;
-    const marked = state.marked.filter(Boolean).length;
-    const total = state.test.questions.length;
-    const left = total - answered;
-    const pmA = document.getElementById('pmAns'); if (pmA) pmA.textContent = answered;
-    const pmM = document.getElementById('pmMark'); if (pmM) pmM.textContent = marked;
-    const pmL = document.getElementById('pmLeft'); if (pmL) pmL.textContent = left;
+    // ---- List view: grouped by section with status dots ----
+    if (list) {
+      const sections = state.test.sections;
+      list.innerHTML = sections.map((sec, sIdx) => {
+        const rows = [];
+        for (let i = sec.questions[0] - 1; i <= sec.questions[1] - 1; i++) {
+          const s = qState(i);
+          const isCurrent = i === state.current;
+          const statusClass = s;
+          const statusChar = s === 'marked' ? '★' : '';
+          rows.push(`
+            <div class="pd-list-row${isCurrent ? ' current' : ''}" data-i="${i}">
+              <span class="pd-list-num">Q${i + 1}</span>
+              <span class="pd-list-status ${statusClass}">${statusChar}</span>
+              <span class="pd-list-label">${s === 'attempted' ? 'Attempted' : s === 'marked' ? 'Marked for review' : s === 'unattempted' ? 'Visited — not answered' : 'Not visited'}</span>
+            </div>`);
+        }
+        return `
+          <div class="pd-list-section">
+            <div class="pd-list-section-title">Section ${sIdx + 1} · ${sec.name} <span style="float:right;font-weight:600">Q${sec.questions[0]}–Q${sec.questions[1]}</span></div>
+            ${rows.join('')}
+          </div>`;
+      }).join('');
+      list.querySelectorAll('.pd-list-row').forEach(r => {
+        r.addEventListener('click', () => {
+          state.visited[+r.dataset.i] = true;
+          state.current = +r.dataset.i;
+          App.renderQuestion();
+          App.modal.close('palette');
+        });
+      });
+    }
+  };
+
+  /* ---- View tab switcher (Grid ↔ List) ---- */
+  App.setPaletteView = function (which) {
+    const grid = document.getElementById('paletteGridMobile');
+    const list = document.getElementById('paletteListMobile');
+    document.querySelectorAll('[data-pd-view]').forEach(t => t.classList.toggle('active', t.dataset.pdView === which));
+    if (which === 'list') {
+      if (grid) grid.hidden = true;
+      if (list) list.hidden = false;
+    } else {
+      if (grid) grid.hidden = false;
+      if (list) list.hidden = true;
+    }
+  };
+
+  /* ---- Section collapse/expand ---- */
+  App.togglePaletteSection = function () {
+    const sec = document.querySelector('.pd-section');
+    if (sec) sec.classList.toggle('collapsed');
   };
 
   App.openSubmit = function () {
