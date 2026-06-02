@@ -242,8 +242,38 @@
     const fab = document.getElementById('paletteFab');
     const pmodal = document.getElementById('paletteModal');
     const pclose = document.getElementById('paletteCloseBtn');
-    fab?.addEventListener('click', () => pmodal.classList.add('show'));
-    pclose?.addEventListener('click', () => pmodal.classList.remove('show'));
+    const pcloseTop = document.getElementById('paletteCloseBtnTop');
+    const psubmit = document.getElementById('pmSubmit');
+
+    fab?.addEventListener('click', () => {
+      App.renderPalette();
+      pmodal.classList.add('show');
+    });
+    const closeModal = () => pmodal.classList.remove('show');
+    pclose?.addEventListener('click', closeModal);
+    pcloseTop?.addEventListener('click', closeModal);
+    pmodal?.addEventListener('click', (e) => { if (e.target === pmodal) closeModal(); });
+    psubmit?.addEventListener('click', () => { closeModal(); App.openSubmit(); });
+
+    // Section jump pills inside mobile palette
+    document.querySelectorAll('.pm-jump').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.pm-jump').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const j = btn.dataset.jump;
+        const body = document.querySelector('.pm-body');
+        if (!body) return;
+        body.scrollTo({ top: 0, behavior: 'smooth' });
+        if (j !== 'all') {
+          const secIdx = +j;
+          const startIdx = bank.sections[secIdx].questions[0] - 1;
+          state.current = startIdx;
+          state.visited[startIdx] = true;
+          App.renderQuestion();
+          closeModal();
+        }
+      });
+    });
 
     App.renderPalette();
     App.updateHeader();
@@ -338,11 +368,18 @@
 
     const answered = state.answers.filter(a => a !== null).length;
     const marked = state.marked.filter(Boolean).length;
+    const visited = state.visited.filter(Boolean).length;
+    const total = state.test.questions.length;
+    const left = total - answered;
     document.getElementById('cntAnswered').textContent = answered;
     document.getElementById('cntMarked').textContent = marked;
-    document.getElementById('cntNot').textContent = state.test.questions.length - (state.visited.filter(Boolean).length);
+    document.getElementById('cntNot').textContent = total - visited;
     document.getElementById('totalAttempted').textContent = answered;
-    document.getElementById('totalUnattempted').textContent = state.test.questions.length - answered;
+    document.getElementById('totalUnattempted').textContent = left;
+    // Mobile palette mini-stats
+    const pmA = document.getElementById('pmAns'); if (pmA) pmA.textContent = answered;
+    const pmM = document.getElementById('pmMark'); if (pmM) pmM.textContent = marked;
+    const pmL = document.getElementById('pmLeft'); if (pmL) pmL.textContent = left;
   };
 
   App.updateHeader = function () {

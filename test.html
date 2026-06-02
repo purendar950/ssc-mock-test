@@ -107,15 +107,44 @@
 <button class="palette-fab" id="paletteFab" aria-label="Open palette">📋</button>
 <div class="palette-modal-backdrop" id="paletteModal">
   <div class="palette-modal">
-    <h4 style="margin-bottom:4px">Question palette</h4>
-    <p class="muted small" style="margin-bottom:12px">Tap a number to jump</p>
-    <div class="legend" style="flex-direction:row;flex-wrap:wrap;gap:10px">
+    <div class="pm-head">
+      <div class="pm-handle"></div>
+      <div class="pm-title">
+        <strong>Question palette</strong>
+        <span class="muted small">Tap a number to jump</span>
+      </div>
+      <button class="pm-close" id="paletteCloseBtnTop" aria-label="Close">✕</button>
+    </div>
+
+    <div class="pm-stats" id="pmStats">
+      <div><strong id="pmAns">0</strong><span>Answered</span></div>
+      <div><strong id="pmMark">0</strong><span>Marked</span></div>
+      <div><strong id="pmLeft">0</strong><span>Left</span></div>
+    </div>
+
+    <div class="pm-legend">
       <span><i class="dot dot-answered"></i> Answered</span>
       <span><i class="dot dot-marked"></i> Marked</span>
+      <span><i class="dot dot-current"></i> Current</span>
       <span><i class="dot dot-not"></i> Not visited</span>
     </div>
-    <div class="palette-grid" id="paletteGridMobile"></div>
-    <button class="btn btn-primary btn-block" id="paletteCloseBtn" style="margin-top:14px">Close</button>
+
+    <div class="pm-sections" id="pmSections">
+      <button class="pm-jump active" data-jump="all">All</button>
+      <button class="pm-jump" data-jump="0">Reasoning (1–25)</button>
+      <button class="pm-jump" data-jump="1">GA (26–50)</button>
+      <button class="pm-jump" data-jump="2">Quant (51–75)</button>
+      <button class="pm-jump" data-jump="3">English (76–100)</button>
+    </div>
+
+    <div class="pm-body">
+      <div class="palette-grid" id="paletteGridMobile"></div>
+    </div>
+
+    <div class="pm-foot">
+      <button class="btn btn-outline" id="paletteCloseBtn">Close</button>
+      <button class="btn btn-accent" id="pmSubmit">Submit Test</button>
+    </div>
   </div>
 </div>
 
